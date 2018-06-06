@@ -52,25 +52,3 @@ node('ios') {
     stash name: 'ipa', includes: "build/${BUILD_CONFIG}-${SDK}/${OUTPUT_FILE_NAME}"
   }
 }
-
-node('appium') {
-  stage('Checkout') {
-    checkout scm
-    unstash name: 'ipa'
-    sh "mv build/${BUILD_CONFIG}-${SDK}/${OUTPUT_FILE_NAME} test/helloworld.ipa"
-    sh 'cp ~/appium-ios-dc.json test/dc.json'
-  }
-
-  stage('Test') {
-    dir('test') {
-      try {
-        sh 'appium &'
-        sh 'sleep 10'
-        sh 'npm install'
-        sh 'npm start'
-      } finally {
-        sh 'lsof -i tcp:4723 | grep LISTEN | awk \'{print $2}\' | xargs kill'
-      }
-    }
-  }
-}
